@@ -1,0 +1,30 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: keda-cron
+  namespace: default
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        containers:
+          - name: nginx-job
+            image: nginx
+            imagePullPolicy: Always
+            command: ["echo","some Job Running"]
+  pollingInterval:  5                    # Optional. Default: 5 seconds
+  minReplicaCount:  0                   # Optional. Default: 0
+  maxReplicaCount:  2                    # Optional. Default: 100
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  rollout:
+    strategy: gradual                        
+    propagationPolicy: foreground
+  triggers:
+  - type: cron
+    metadata:
+      # Required
+      timezone: Asia/Kolkata  # The acceptable values would be a value from the IANA Time Zone Database.
+      start: 0/2 * * * *       # Every 2nd minute
+      end: 0/4 * * * *         # Every 4th minute
+      desiredReplicas: "2"
